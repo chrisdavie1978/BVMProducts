@@ -28,8 +28,12 @@ async def chat(query: Query):
 
     if response.status_code != 200:
        return {"response": "Failed to fetch product data."}
+    
+    try:
+       data = response.json()
+    except ValueError as e:
+       return {"response": f"Failed to parse JSON: {str(e)}", "raw": response.text}
 
-    data = response.json()
 
     if not data.get("products"):
        return {"response": f'No product found with name "{product_name}".'}
@@ -38,7 +42,3 @@ async def chat(query: Query):
     name = product.get("name", "N/A")
     price = product.get("price", "N/A")
     description = product.get("description", "N/A")
-
-    return {
-        "response": f"**Product:** {name}\n**Price:** {price}\n**Description:** {description}"
-    }
