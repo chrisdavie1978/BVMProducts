@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import requests
 import os
@@ -49,3 +51,11 @@ async def chat(query: Query):
     return {
         "response": f"**Product:** {name}\n**Price:** {price}\n**Description:** {description}"
     }
+
+# Mount the static directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Serve the chatbot interface at the root URL
+@app.get("/")
+async def root():
+    return FileResponse("static/chatbot_interface.html")
