@@ -12,33 +12,33 @@ SALSIFY_API_TOKEN = os.getenv("SALSIFY_API_TOKEN")
 SALSIFY_DOMAIN = os.getenv("SALSIFY_DOMAIN")
 
 class Query(BaseModel):
-    message: str
+    message: str
 
 @app.post("/chat")
 async def chat(query: Query):
-    product_name = query.message.strip()
+    product_name = query.message.strip()
 
-    headers = {
-        "Authorization": f"Bearer {SALSIFY_API_TOKEN}"
-    }
+    headers = {
+        "Authorization": f"Bearer {SALSIFY_API_TOKEN}"
+    }
 
-    url = f"https://{SALSIFY_DOMAIN}/api/products?filter=name:{product_name}"
+    url = f"https://{SALSIFY_DOMAIN}/api/products?filter=name:{product_name}"
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers)
 
-    if response.status_code != 200:
-        return {"response": "Failed to fetch product data."}
+    if response.status_code != 200:
+       return {"response": "Failed to fetch product data."}
 
-    data = response.json()
+    data = response.json()
 
-    if not data.get("products"):
-        return {"response": f"No product found with name '{product_name}'."}
+    if not data.get("products"):
+       return {"response": f"No product found with name '{product_name}'."}
 
-    product = data["products"][0]
-    name = product.get("name", "N/A")
-    price = product.get("price", "N/A")
-    description = product.get("description", "N/A")
+    product = data["products"][0]
+    name = product.get("name", "N/A")
+    price = product.get("price", "N/A")
+    description = product.get("description", "N/A")
 
-    return {
-        "response": f"**Product:** {name}\n**Price:** {price}\n**Description:** {description}"
-    }
+    return {
+        "response": f"**Product:** {name}\n**Price:** {price}\n**Description:** {description}"
+    }
