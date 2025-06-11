@@ -32,7 +32,7 @@ async def chat(query: Query):
     data = response.json()
 
     if not data.get("products"):
-       return {"response": f"No product found with name '{product_name}'."}
+       return {"response": f'No product found with name "{product_name}".'}
 
     product = data["products"][0]
     name = product.get("name", "N/A")
