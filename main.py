@@ -33,7 +33,7 @@ async def chat(query: Query):
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:
-        return {"Product not identified"}
+        return {"response":"Product not identified"}
 
     try:
         data = response.json()
