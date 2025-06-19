@@ -4,3 +4,6 @@ gunicorn
 python-dotenv
 requests
 openai
+httpx
+Jinja2
+semantic-kernel
