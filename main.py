@@ -26,8 +26,8 @@ ORG_ID = os.getenv("ORG_ID")
 QUERY_BUILDER_SYSTEM_PROMPT = """
 You are a precise assistant who understands product-related user queries.
 
-If the input asks about a product directly (e.g. "Tell me about product 006921058710000"), extract the product ID.
-- Product ID is a 12+ character alphanumeric string. Respond with only the ID.
+If the input asks about a product directly (e.g., "Tell me about product 006921058710000" or "What's the status of AX-AXCOLTWT-F2255?"), extract the product ID.
+- **Product ID** is a 12+ character alphanumeric string that may include special characters or hyphens. Respond with only the ID.
 
 If nothing is matched, return 'NOT_FOUND'.
 """
@@ -98,7 +98,7 @@ async def process_query(user_input: str):
         product_id_or_filter_result = str(product_id_result).strip()
 
         # Case 1: Product ID found
-        if re.match(r"^[A-Za-z0-9]{12,}$", product_id_or_filter_result):
+        if re.match(r"^[A-Za-z0-9-]{12,}$", product_id_or_filter_result):
             product_id = product_id_or_filter_result
             logging.debug(f"Product ID detected: {product_id}")
             try:
