@@ -1,33 +1,194 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px; /* Limits content width on larger screens */
+            margin: 0 auto; /* Centers the container */
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        textarea {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Include padding and border in width calculation */
+            font-size: 16px;
+            resize: vertical; /* Allow vertical resizing of the textarea */
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease; /* Smooth hover effect */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        h2 {
+            color: #0056b3;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        #response { /* Styled for readability, now renders HTML */
+            background-color: #e9e9e9;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 100px; /* Ensure some visible space even if no content */
+            overflow-x: auto; /* Allow horizontal scrolling if content is too wide (e.g., code blocks) */
+            font-family: Arial, sans-serif; /* Standard font for readable text */
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        /* Specific styles for Markdown-rendered content within #response */
+        #response h3 {
+            color: #0056b3;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        #response h4 { /* For the "#### Products within the Compact Range:" */
+            color: #0056b3;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+        #response ul {
+            list-style-type: disc; /* Standard bullet points */
+            margin-left: 20px; /* Indent lists */
+            padding-left: 0;
+        }
+        #response ul li {
+            margin-bottom: 8px;
+        }
+        #response strong {
+            font-weight: bold;
+        }
+        #response p {
+            margin-bottom: 10px;
+        }
+        /* Style for links if any are present in the markdown, like "View Image" */
+        #response a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        #response a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            textarea {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            h2 {
+                font-size: 20px;
+            }
+            button {
+                width: 100%; /* Full width button on small screens */
+                margin-top: 10px;
+            }
+            #response {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <h1>Chat with the Bot</h1>
-    <textarea id="message" rows="4" cols="50" placeholder="Enter your message here..."></textarea><br>
-    <button onclick="sendMessage()">Send</button>
-    <h2>Response:</h2>
-    <pre id="response"></pre>
+    <div class="container">
+        <h1>Chat with the Bot</h1>
+        <textarea id="message" rows="4" cols="50" placeholder="Enter your message here..."></textarea><br>
+        <button onclick="sendMessage()">Send</button>
+        <h2>Response:</h2>
+        <div id="response"></div>
+    </div>
 
     <script>
         async function sendMessage() {
             const message = document.getElementById('message').value;
             const responseElement = document.getElementById('response');
 
-            const response = await fetch('/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ message: message })
-            });
+            // Clear previous response and show a loading message
+            responseElement.innerHTML = "Waiting for response..."; // Use innerHTML to allow basic HTML like <p> for messages
 
-            const data = await response.json();
-            responseElement.textContent = JSON.stringify(data, null, 2);
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // *** CRITICAL CHANGE: Check for 'reply' and render Markdown ***
+                if (data && typeof data.reply === 'string') { // Ensure data.reply exists and is a string
+                    // Use marked.js to convert the markdown 'reply' string to HTML
+                    // Marked.js (v4+) returns a Promise, so await it.
+                    const htmlContent = await marked.parse(data.reply);
+                    responseElement.innerHTML = htmlContent;
+                } else {
+                    // Fallback: If 'reply' is not a string or missing, show the raw JSON (formatted)
+                    responseElement.textContent = JSON.stringify(data, null, 2);
+                }
+                // *** END OF CRITICAL CHANGE ***
+
+                document.getElementById('message').value = ''; // Clear input field
+
+            } catch (error) {
+                console.error("Error sending message or parsing response:", error);
+                // Display error message with some basic styling for visibility
+                responseElement.innerHTML = `<p style="color: red;">Error: Could not connect to the backend or receive a valid response.</p><p style="color: red;">${error.message}</p>`;
+            }
         }
     </script>
 </body>

@@ -7,3 +7,4 @@ openai
 httpx
 Jinja2
 semantic-kernel
+asyncio
