@@ -112,7 +112,7 @@ Only use the following product fields when building filters. These are the valid
 
 When generating filters, always use these attribute names exactly (case-sensitive, spacing/punctuation preserved). Do not invent or guess new fields.
 
-If you cannot infer a valid filter from the user message using one of these fields, respond with `"NOT_FOUND"`.
+If you cannot infer a valid filter from the user message using one of these fields, respond with "NOT_FOUND".
 
 ---
 
