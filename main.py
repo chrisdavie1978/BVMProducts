@@ -24,13 +24,24 @@ SALSIFY_API_KEY = os.getenv("SALSIFY_API_KEY")
 ORG_ID = os.getenv("ORG_ID")
 
 # === System prompts for agents ===
+#You are a smart and precise assistant that understands user questions about product data and can generate structured Salsify filter queries accordingly.
+
 QUERY_BUILDER_SYSTEM_PROMPT = """
-You are a smart and precise assistant that understands user questions about product data and can generate structured Salsify filter queries accordingly.
+You are a multilingual product assistant that understands user queries in any language and generates structured Salsify filter queries.
 
 ## GOAL
 Given a natural language query, your job is to:
-1. Identify if the user is requesting a **filtered list of products**.
-2. If it's a **filter request**, analyze the **intent**, identify the **relevant product attribute(s)** and **expected value(s)**, and construct a valid, encoded Salsify filter string.
+1. Understand natural language queries in any language (e.g., English, Hindi, Spanish, French, etc.).
+2. Identify if the user is requesting a **filtered list of products**.
+3. If it's a **filter request**, analyze the **intent**, identify the **relevant product attribute(s)** and **expected value(s)**, and construct a valid, encoded Salsify filter string.
+
+---
+
+## 🌍 LANGUAGE SUPPORT
+
+- The user query may come in any language.
+- You must auto-detect the language and **still match it correctly** to known product fields in English.
+- Your response (the filter string) must **always be in English**.
 
 ---
 
@@ -73,6 +84,14 @@ Support combining multiple conditions using a comma `,` between expressions.
 
 ---
 
+## 🎯 COMPLEX FILTER EXAMPLES
+Example 1: Item/SKU (Product ID)
+encoded: filter=%3D%27Item%2FSKU%20(Product%20ID)%27%3Acontains(%2700902F158508006%27)
+Example 2: localized_property('Range Description', en-GB):contains('DecoMetalEU')
+encorded: filter=%3Dlocalized_property(%27Range%20Description%27%2Cen-GB)%3Acontains(%27DecoMetalEU%27)
+
+-----
+
 ## FIELD UNDERSTANDING
 
 You support **two types** of field identification:
@@ -91,23 +110,34 @@ Do not reject fields just because they are not listed — prefer to **trust the 
 
 Only use the following product fields when building filters. These are the valid attributes in the Salsify data schema:
 
-| Attribute Name             | Description                                |
-|----------------------------|--------------------------------------------|
-| Item/SKU (Product ID)      | Unique SKU or product code                 |
-| Item Description           | Product name or descriptive title          |
-| Class                      | Product class/category                     |
-| Country of Origin          | Country code for where the item is from    |
-| Item Weight                | Weight of the item                         |
-| Item Volume                | Volume of the item                         |
-| Selling UOM                | Selling unit of measure                    |
-| Stocking UOM               | Stocking unit of measure                   |
-| Item Code                  | Internal item identifier if available      |
-| Range Code
-| Decor Code
-| Grade Code
-| Finish Code
-| Size Code
-| Thickness
+| Attribute Name                                   | Description                                                                 |
+|--------------------------------------------------|-----------------------------------------------------------------------------|
+| Item/SKU (Product ID)                            | Unique identifier or SKU for the product                                   |
+| Item Description                                 | General text description of the product                                    |
+| Product Name                                     | Name or title of the product                                               |
+| Range Code                                       | Code identifying the product's range or collection                         |
+| Decor Code                                       | Code representing the decorative design                                    |
+| Grade Code                                       | Quality or grade level classification of the product                       |
+| Finish Code                                      | Code describing the surface finish type (e.g., matte, glossy)              |
+| Size Code                                        | Code indicating the standard product size                                  |
+| Thickness                                        | Numeric thickness of the item (e.g., 10mm)                                 |
+| Thickness Code                                   | Coded reference for the product's thickness                                |
+| Décor Code                                       | Alternate or regional décor identifier                                     |
+| Range Audience                                   | Target audience or segment for the product range                           |
+| Colour Selection 1                               | Primary color classification or selection                                  |
+| Design Group                                     | Higher-level grouping of products based on design                         |
+| localized_property('Range Description', en-GB)   | Localized English (UK) description of the product range                    |
+| localized_property('Global Colour Group', en-GB) | Localized English (UK) grouping of colors across product lines             |
+| localized_property('Décor Description', en-GB)   | Localized English (UK) description of the décor design                     |
+| localized_property('Design Family', en-GB)       | Localized English (UK) group classification based on design family         |
+| localized_property('Finish Description', en-GB)  | Localized English (UK) text describing the finish (e.g., matte, satin)     |
+| localized_property('Thickness', en-GB)           | Localized English (UK) numeric thickness info                              |
+| localized_property('Thickness UOM', en-GB)       | Localized English (UK) unit of measure for thickness (e.g., mm)            |
+| localized_property('Item Length', en-GB)         | Localized English (UK) numeric value for product length                    |
+| localized_property('Length UOM', en-GB)          | Localized English (UK) unit of measure for length (e.g., mm, cm)           |
+| localized_property('Item Width', en-GB)          | Localized English (UK) numeric value for product width                     |
+| localized_property('Width UOM', en-GB)           | Localized English (UK) unit of measure for width (e.g., mm, cm)            |
+
 
 
 When generating filters, always use these attribute names exactly (case-sensitive, spacing/punctuation preserved). Do not invent or guess new fields.
@@ -125,8 +155,51 @@ Your response must always be **one of**:
 
 
 SUMMARY_SYSTEM_PROMPT = """
-You are a helpful assistant that summarizes product data from JSON.
+You are a multilingual helpful assistant that summarizes product data from JSON any language.
+
+Your job is to extract and display only the following fields (if available) from each product entry:
+
+- Item/SKU (Product ID)
+- Item Description 
+- Product Name
+- Décor Code
+- Range Description - en-GB
+- Range Audience
+- Décor Description - en-GB
+- Global Colour Group - en-GB
+- Colour Selection 1
+- Design Family - en-GB
+- Design Group
+- Item Description
+- Grade Code
+- Finish Code
+- Size Code
+- Thickness Code
+- Finish Description - en-GB
+- Thickness - en-GB
+- Thickness UOM - en-GB
+- Item Length - en-GB
+- Length UOM - en-GB
+- Item Width - en-GB
+- Width UOM - en-GB
+
+---
+
+## OUTPUT FORMAT:
+
+For each product, show the information like this:
+
+Product Name: <value>  
+Décor Code: <value>  
+Range Description - en-GB: <value>  
+...  
+Width UOM - en-GB: <value>  
+
+If a field is missing or empty in the JSON, skip it — do not include empty lines.
+
+Output should be clean and readable for users reviewing product details.
 """
+
 
 # === Kernel and agents setup ===
 kernel = Kernel()
@@ -161,7 +234,7 @@ logging.basicConfig(level=logging.DEBUG)
 # === Helpers ===
 async def get_products_by_filter(filter_query: str):
     logging.debug(f"Fetching products with filter: {filter_query}")
-    url = f"https://app.salsify.com/api/v1/orgs/{ORG_ID}/products?{filter_query}&per_page=5"
+    url = f"https://app.salsify.com/api/v1/orgs/{ORG_ID}/products?{filter_query}&per_page=25"
     headers = {"Authorization": f"Bearer {SALSIFY_API_KEY}", "Accept": "application/json"}
     try:
         async with httpx.AsyncClient() as client:
@@ -179,9 +252,9 @@ def chunk_products(data, chunk_size):
         yield data[i:i + chunk_size]
 
 
-async def summarize_single_chunk(chunk, summary_agent, i):
+async def summarize_single_chunk(chunk, summary_agent,i):
     chunk_json = json.dumps(chunk, indent=2)
-    prompt = f"""You are a helpful assistant.\n{chunk_json}\n"""
+    prompt = f"""You are a helpful assistant and Summarise json \n{chunk_json}\n"""
     try:
         result_text = ""
         async for result in summary_agent.invoke(prompt):
@@ -191,7 +264,7 @@ async def summarize_single_chunk(chunk, summary_agent, i):
         logging.error(f"Error in chunk {i + 1}: {str(e)}")
         return f"Error in chunk {i + 1}"
 
-async def summarize_in_chunks(product_data, summary_agent, chunk_size=5, batch_size=1, delay_between_batches=1.5):
+async def summarize_in_chunks(product_data, summary_agent, chunk_size=25, batch_size=1, delay_between_batches=0):
     chunks = list(chunk_products(product_data["data"], chunk_size))
     summaries = []
 
@@ -210,6 +283,7 @@ async def summarize_in_chunks(product_data, summary_agent, chunk_size=5, batch_s
             await asyncio.sleep(delay_between_batches)
 
     return "\n\n".join(summaries)
+
 
 
 async def process_query(user_input: str):
