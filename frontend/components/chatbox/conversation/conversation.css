@@ -1,0 +1,100 @@
+.bot h1,
+.bot h2,
+.bot h3,
+.bot h4,
+.bot h5,
+.bot h6 {
+  color: gray;
+  margin-top: 1.2em;
+  margin-bottom: 0.8em;
+  border-bottom: 1px solid #cce;
+  padding-bottom: 5px;
+}
+
+.bot h1 {
+  font-size: 1.5em;
+}
+
+.bot h2 {
+  font-size: 1.4em;
+}
+
+.bot h3 {
+  font-size: 1.3em;
+}
+
+.bot h4 {
+  font-size: 1.2em;
+}
+
+.bot h5 {
+  font-size: 1.1em;
+}
+
+.bot h6 {
+  font-size: 1em;
+}
+
+.bot p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.bot ul {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.bot ul li {
+  background-color: #ffffff;
+  border: 1px solid #d9e2ef;
+  border-radius: 8px;
+  padding: 1em;
+  margin-bottom: 1em;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.bot ul li strong {
+  color: #333;
+}
+
+.bot table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 1em;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.bot table th,
+.bot table td {
+  border: 1px solid #e0e0e0;
+  padding: 10px 15px;
+  text-align: left;
+}
+
+.bot table th {
+  background-color: #f0f8ff;
+  color: gray;
+  font-weight: 600;
+}
+
+.bot table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.bot table tr:hover {
+  background-color: #f1f7ff;
+}
+
+.bot ol {
+  display: block;
+  list-style-type: decimal;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  padding-inline-start: 40px;
+  unicode-bidi: isolate;
+}
