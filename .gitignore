@@ -1,2 +1,15 @@
 /k8
 /docker-compose.yml
+
+# dependencies
+/frontend/node_modules
+
+# next.js
+/frontend/.next
+
+# production
+/frontend/build
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
